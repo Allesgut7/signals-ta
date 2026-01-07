@@ -2,7 +2,7 @@ from config import *
 from data_loader import load_data
 from indicators import add_indicators
 from levels import support_resistance_levels
-from signal import generate_signal
+from signal import generate_signal, macd_case_narrative
 from fib import fibonacci_levels
 import pandas as pd
 
@@ -14,9 +14,10 @@ def run(symbol=SYMBOL):
     df = add_indicators(df, MA_FAST, MA_SLOW, RSI_PERIOD, MACD_FAST, MACD_SLOW, MACD_SIGNAL)
 
     supports, resistances = support_resistance_levels(df, SUP_RES_WINDOW, SUP_RES_COUNT)
-    fib = fibonacci_levels(df)
-    trade = generate_signal(df, fib, supports, resistances)
+    fib_retr, fib_ext = fibonacci_levels(df)
+    trade = generate_signal(df, fib_retr, fib_ext)
     last = df.iloc[-1]
+    narrative = macd_case_narrative(df, symbol)
 
     print("\n📊 SWING TRADING ANALYSIS")
     print(f"Saham : {symbol}")
@@ -24,6 +25,9 @@ def run(symbol=SYMBOL):
     print(f"RSI   : {last['RSI']:.2f}")
     print(f"MACD  : {last['MACD']:.4f} > {last['MACD_SIGNAL']:.4f}")
     print(f"MA20/MA50 : {last['MA_FAST']:.2f}/{last['MA_SLOW']:.2f}")
+    print("\n📝 INTEPRETASI MACD")
+    print(narrative)
+
 
     print("\n🧱 SUPPORT")
     for i, s in enumerate(supports, 1):
@@ -33,9 +37,13 @@ def run(symbol=SYMBOL):
     for i, r in enumerate(resistances, 1):
         print(f"R{i} : {r}")
 
-    print("\n📐 FIBONACCI")
-    for k, v in fib.items():
-        print(f"{k} : {v}")
+    print("\n📐 FIBONACCI RETRACEMENT (ENTRY / SUPPORT / SL)")
+    for k, v in fib_retr.items():
+        print(f"Fib {k} : {v}")
+
+    print("\n📐 FIBONACCI EXTENSION (MULTI TAKE PROFIT)")
+    for k, v in fib_ext.items():
+        print(f"Ext {k} : {v}")
 
     print("\n🎯 TRADE PLAN")
     for k, v in trade.items():

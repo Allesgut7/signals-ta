@@ -1,4 +1,4 @@
-SYMBOL = "ENRG.JK"
+SYMBOL = "IBOS.JK"
 PERIOD = "6mo"
 INTERVAL = "1d"
 
