@@ -1,10 +1,14 @@
-SYMBOL = "REAL.JK"
+SYMBOL = "ENRG.JK"
 PERIOD = "6mo"
 INTERVAL = "1d"
 
 MA_FAST = 20
 MA_SLOW = 50
 RSI_PERIOD = 14
+
+MACD_FAST = 12
+MACD_SLOW = 26
+MACD_SIGNAL = 9
 
 SUP_RES_WINDOW = 20
 SUP_RES_COUNT = 3   # jumlah level support & resistance

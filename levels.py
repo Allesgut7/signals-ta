@@ -17,3 +17,5 @@ def support_resistance_levels(df, window=20, count=3):
         resistances.append(round(last_high - step * (i - 1), 2))
 
     return supports, resistances
+
+
