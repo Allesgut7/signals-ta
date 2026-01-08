@@ -6,6 +6,7 @@ from signal import generate_signal, macd_case_narrative
 from fib import get_valid_swing, fibonacci_levels, detect_swings
 from trendline import trend_status
 from visualisasi import plot_swing_analysis
+from market_structure import detect_bos_choch
 import pandas as pd
 
 
@@ -26,11 +27,20 @@ def run(symbol=SYMBOL):
     # 2️⃣ ADD INDICATORS
     # =========================
     df = add_indicators(df, MA_FAST, MA_SLOW, RSI_PERIOD, MACD_FAST, MACD_SLOW, MACD_SIGNAL)
-
+    # 3️⃣ SUPPORT & RESISTANCE
+    # =========================
+    swing_highs, swing_lows = detect_swings(df)
+    supports, resistances = support_resistance_levels(
+        swing_highs,
+        swing_lows,
+        price=df['Close'].iloc[-1],
+        atr=df["ATR"].iloc[-1]
+    )
     # =========================
     # 4️⃣ TREND STATUS
     # =========================
-    trend = trend_status(df)
+    # trend = trend_status(df)
+    trend, structure_signal = detect_bos_choch(swing_highs, swing_lows)
     
     # =========================
     # 5️⃣ AUTO SWING & FIBONACCI
@@ -43,15 +53,7 @@ def run(symbol=SYMBOL):
     fib_retr, fib_ext = fibonacci_levels(swing_low, swing_high, trend)
 
     # =========================
-    # 3️⃣ SUPPORT & RESISTANCE
-    # =========================
-    swing_highs, swing_lows = detect_swings(df)
-    supports, resistances = support_resistance_levels(
-        swing_highs,
-        swing_lows,
-        price=df['Close'].iloc[-1],
-        atr=df["ATR"].iloc[-1]
-    )
+
 
     # =========================
     # 6️⃣ SIGNAL GENERATION
@@ -90,6 +92,7 @@ def run(symbol=SYMBOL):
     print(f"MA20/MA50  : {last['MA_FAST']:.2f}/{last['MA_SLOW']:.2f}")
     print(f"Swings Low : {swing_low}")
     print(f"Swing High : {swing_high}")
+    print(f"Market Structure : {structure_signal}")
 
     print("\n📈 TREND STATUS")
     print(f"Trend      : {trend}")

@@ -10,13 +10,13 @@ def calculate_trendline(df, lookback=30):
 
     return slope, trendline_value
 
-def trend_status(df, lookback=30, threshold=0.05):
-    slope, trend_price = calculate_trendline(df, lookback)
-    current_price = df["Close"].iloc[-1]
+# def trend_status(df, lookback=30, threshold=0.05):
+#     slope, trend_price = calculate_trendline(df, lookback)
+#     current_price = df["Close"].iloc[-1]
 
-    if slope > threshold and current_price > trend_price:
-        return "BULLISH"
-    elif slope < -threshold and current_price < trend_price:
-        return "BEARISH"
-    else:
-        return "SIDEWAYS"
+#     if slope > threshold and current_price > trend_price:
+#         return "BULLISH"
+#     elif slope < -threshold and current_price < trend_price:
+#         return "BEARISH"
+#     else:
+#         return "SIDEWAYS"
