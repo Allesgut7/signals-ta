@@ -1,4 +1,4 @@
-SYMBOL = "REAL.JK"
+SYMBOL = "TMAS.JK"
 PERIOD = "6mo"
 INTERVAL = "1d"
 

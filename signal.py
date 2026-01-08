@@ -1,29 +1,7 @@
 def generate_signal(df, fib_retr, fib_ext, trend):
     last = df.iloc[-1]
-    prev = df.iloc[-2]
     price = last["Close"]
 
-    # =========================
-    # TREND DETECTION
-    # =========================
-    if (
-        price > last["MA_FAST"]
-        and last["MA_FAST"] > last["MA_SLOW"]
-        and last["MACD"] > last["MACD_SIGNAL"]
-    ):
-        trend = "BULLISH"
-    elif (
-        price < last["MA_FAST"]
-        and last["MA_FAST"] < last["MA_SLOW"]
-        and last["MACD"] < last["MACD_SIGNAL"]
-    ):
-        trend = "BEARISH"
-    else:
-        trend = "SIDEWAYS"
-
-    # =========================
-    # DEFAULT OUTPUT
-    # =========================
     signal = "WAIT"
     entry_type = None
     entry_price = None
@@ -35,28 +13,26 @@ def generate_signal(df, fib_retr, fib_ext, trend):
     # =========================
     if trend == "BULLISH":
 
-        # Fibonacci Retracement (low → high)
         fib_382 = fib_retr["0.382"]
         fib_5 = fib_retr["0.5"]
         fib_618 = fib_retr["0.618"]
 
-        # ENTRY ZONE
         in_pullback_zone = fib_382 >= price >= fib_5
-        momentum_ok = 40 < last["RSI"] < 65
+        momentum_ok = (
+            40 < last["RSI"] < 65
+            and last["MACD"] > last["MACD_SIGNAL"]
+        )
 
-        # Pullback Entry
         if in_pullback_zone and momentum_ok:
             signal = "BUY"
             entry_type = "PULLBACK BUY (LIMIT)"
             entry_price = round(fib_5, 2)
 
-        # Breakout Entry
         elif price > fib_382 and momentum_ok:
             signal = "BUY"
             entry_type = "BREAKOUT BUY (STOP)"
             entry_price = round(last["High"] * 1.005, 2)
 
-        # Support & Stop Loss
         support_levels = [
             round(fib_382, 2),
             round(fib_5, 2),
@@ -65,10 +41,9 @@ def generate_signal(df, fib_retr, fib_ext, trend):
         stop_loss = round(fib_618 * 0.97, 2)
 
     # =========================
-    # BEARISH LOGIC
+    # BEARISH
     # =========================
     elif trend == "BEARISH":
-        signal = "WAIT"
         entry_type = "TREND BEARISH"
         support_levels = [
             round(fib_retr["0.382"], 2),
@@ -77,15 +52,11 @@ def generate_signal(df, fib_retr, fib_ext, trend):
         ]
 
     # =========================
-    # SIDEWAYS LOGIC
+    # SIDEWAYS
     # =========================
     else:
-        signal = "WAIT"
         entry_type = "SIDEWAYS - NO TRADE"
 
-    # =========================
-    # FINAL OUTPUT
-    # =========================
     return {
         "trend": trend,
         "signal": signal,
@@ -93,10 +64,11 @@ def generate_signal(df, fib_retr, fib_ext, trend):
         "entry_price": entry_price,
         "support_levels": support_levels,
         "stop_loss": stop_loss,
-        "tp1": round(fib_ext["1.272"], 2),
-        "tp2": round(fib_ext["1.618"], 2),
-        "tp3": round(fib_ext["2.0"], 2),
+        "tp1": round(fib_ext["1"], 2),
+        "tp2": round(fib_ext["2"], 2),
+        "tp3": round(fib_ext["3"], 2),
     }
+
 
 
 

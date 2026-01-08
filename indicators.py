@@ -1,5 +1,6 @@
 from ta.trend import SMAIndicator, MACD
 from ta.momentum import RSIIndicator
+import pandas as pd
 
 def add_indicators(df, ma_fast, ma_slow, rsi_period, macd_fast, macd_slow, macd_signal):
     df["MA_FAST"] = SMAIndicator(df["Close"], ma_fast).sma_indicator()
@@ -16,3 +17,17 @@ def add_indicators(df, ma_fast, ma_slow, rsi_period, macd_fast, macd_slow, macd_
     df["MACD_SIGNAL"] = macd.macd_signal()
     
     return df
+
+def calculate_atr(df, period=14):
+    high = df["High"]
+    low = df["Low"]
+    close = df["Close"]
+
+    tr = pd.concat([
+        high - low,
+        (high - close.shift()).abs(),
+        (low - close.shift()).abs()
+    ], axis=1).max(axis=1)
+
+    atr = tr.rolling(period).mean()
+    return atr
