@@ -1,32 +1,105 @@
-def generate_signal(df, fib_retr, fib_ext):
+def generate_signal(df, fib_retr, fib_ext, trend):
     last = df.iloc[-1]
+    prev = df.iloc[-2]
     price = last["Close"]
 
-    # ENTRY ZONE
-    entry_zone = fib_retr["0.382"] <= price <= fib_retr["0.5"]
-
-    # BUY CONFIRMATION
-    buy_signal = (
+    # =========================
+    # TREND DETECTION
+    # =========================
+    if (
         price > last["MA_FAST"]
         and last["MA_FAST"] > last["MA_SLOW"]
-        and 40 < last["RSI"] < 65
         and last["MACD"] > last["MACD_SIGNAL"]
-        and entry_zone
-    )
+    ):
+        trend = "BULLISH"
+    elif (
+        price < last["MA_FAST"]
+        and last["MA_FAST"] < last["MA_SLOW"]
+        and last["MACD"] < last["MACD_SIGNAL"]
+    ):
+        trend = "BEARISH"
+    else:
+        trend = "SIDEWAYS"
 
-    entry = price
-    support = fib_retr["0.618"]
-    stop_loss = round(fib_retr["0.618"] * 0.97, 2)
+    # =========================
+    # DEFAULT OUTPUT
+    # =========================
+    signal = "WAIT"
+    entry_type = None
+    entry_price = None
+    support_levels = []
+    stop_loss = None
 
+    # =========================
+    # BULLISH LOGIC
+    # =========================
+    if trend == "BULLISH":
+
+        # Fibonacci Retracement (low → high)
+        fib_382 = fib_retr["0.382"]
+        fib_5 = fib_retr["0.5"]
+        fib_618 = fib_retr["0.618"]
+
+        # ENTRY ZONE
+        in_pullback_zone = fib_382 >= price >= fib_5
+        momentum_ok = 40 < last["RSI"] < 65
+
+        # Pullback Entry
+        if in_pullback_zone and momentum_ok:
+            signal = "BUY"
+            entry_type = "PULLBACK BUY (LIMIT)"
+            entry_price = round(fib_5, 2)
+
+        # Breakout Entry
+        elif price > fib_382 and momentum_ok:
+            signal = "BUY"
+            entry_type = "BREAKOUT BUY (STOP)"
+            entry_price = round(last["High"] * 1.005, 2)
+
+        # Support & Stop Loss
+        support_levels = [
+            round(fib_382, 2),
+            round(fib_5, 2),
+            round(fib_618, 2),
+        ]
+        stop_loss = round(fib_618 * 0.97, 2)
+
+    # =========================
+    # BEARISH LOGIC
+    # =========================
+    elif trend == "BEARISH":
+        signal = "WAIT"
+        entry_type = "TREND BEARISH"
+        support_levels = [
+            round(fib_retr["0.382"], 2),
+            round(fib_retr["0.5"], 2),
+            round(fib_retr["0.618"], 2),
+        ]
+
+    # =========================
+    # SIDEWAYS LOGIC
+    # =========================
+    else:
+        signal = "WAIT"
+        entry_type = "SIDEWAYS - NO TRADE"
+
+    # =========================
+    # FINAL OUTPUT
+    # =========================
     return {
-        "signal": "BUY" if buy_signal else "WAIT",
-        "entry": round(entry, 2),
-        "support": support,
+        "trend": trend,
+        "signal": signal,
+        "entry_type": entry_type,
+        "entry_price": entry_price,
+        "support_levels": support_levels,
         "stop_loss": stop_loss,
-        "tp1": fib_ext["1.272"],
-        "tp2": fib_ext["1.618"],
-        "tp3": fib_ext["2.0"],
+        "tp1": round(fib_ext["1.272"], 2),
+        "tp2": round(fib_ext["1.618"], 2),
+        "tp3": round(fib_ext["2.0"], 2),
     }
+
+
+
 
 
 def macd_case_narrative(df, symbol):

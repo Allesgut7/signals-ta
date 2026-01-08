@@ -1,4 +1,4 @@
-SYMBOL = "IBOS.JK"
+SYMBOL = "REAL.JK"
 PERIOD = "6mo"
 INTERVAL = "1d"
 
